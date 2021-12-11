@@ -18,40 +18,6 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-const database = {
-  users: [
-    {
-      id: "1234",
-      name: "dor",
-      password: "123",
-      email: "dorsabag93@gmail.com",
-      entries: 0,
-      joined: new Date(),
-    },
-    {
-      id: "1235",
-      name: "noa",
-      password: "123",
-      email: "noa@gmail.com",
-      entries: 0,
-      joined: new Date(),
-    },
-    {
-      id: "1236",
-      name: "niv",
-      password: "123",
-      email: "niv@gmail.com",
-      entries: 0,
-      joined: new Date(),
-    },
-  ],
-  login: {
-    id: "987",
-    hasd: "",
-    email: "",
-  },
-};
-
 db.select("*")
   .from("users")
   .then((data) => console.log(data));
@@ -61,14 +27,25 @@ app.get("/", (req, res) => {
 });
 
 app.post("/signin", (req, res) => {
-  if (
-    req.body.email === database.users[0].email &&
-    req.body.password === database.users[0].password
-  ) {
-    res.json("success");
-  } else {
-    res.status(400).json("error login");
-  }
+  db.select("email", "hash")
+    .from("login")
+    .where("email", "=", req.body.email)
+    .then((data) => {
+      const isValid = bcrypt.compareSync(req.body.password, data[0].hash);
+      if (isValid) {
+        return db
+          .select("*")
+          .from("users")
+          .where("email", "=", req.body.email)
+          .then((user) => {
+            res.json(user[0]);
+          })
+          .catch((err) => res.status(400).json("unable to ger user"));
+      } else {
+        res.status(400).json("wrong cred");
+      }
+    })
+    .catch((err) => res.status(400).json("wrong cred"));
 });
 
 app.get("/profile/:id", (req, res) => {
@@ -90,21 +67,44 @@ app.get("/profile/:id", (req, res) => {
 app.post("/register", (req, res) => {
   const { email, name, password } = req.body;
 
-  db("users")
-    .returning("*")
-    .insert({
-      email: email,
-      name: name,
-      joined: new Date(),
-    })
-    .then((user) => {
-      res.json(user[0]);
-    })
-    .catch((err) => res.status(400).json("unable to register"));
+  const hash = bcrypt.hashSync(password);
+
+  db.transaction((trx) => {
+    trx
+      .insert({
+        hash: hash,
+        email: email,
+      })
+      .into("login")
+      .returning("email")
+      .then((loginEmail) => {
+        return trx("users")
+          .returning("*")
+          .insert({
+            email: loginEmail[0],
+            name: name,
+            joined: new Date(),
+          })
+          .then((user) => {
+            res.json(user[0]);
+          });
+      })
+      .then(trx.commit)
+      .catch(trx.rollback);
+  }).catch((err) => res.status(400).json("unable to register"));
 });
 
 app.put("/image", (req, res) => {
   const { id } = req.body;
+
+  db("users")
+    .where("id", "=", id)
+    .increment("entries", 1)
+    .returning("entries")
+    .then((entries) => {
+      res.json(entries[0]);
+    })
+    .catch((err) => res.status(400).json("unable to ger entries"));
 });
 
 app.listen(3000, () => {
