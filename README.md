@@ -1,4 +1,4 @@
-# Face recognition website with login
+# Face recognition website
 
 - A React & node.js project, client side and backend conected to PostgreSQL.
 
