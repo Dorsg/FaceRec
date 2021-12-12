@@ -12,10 +12,10 @@ class Register extends Component {
     };
   }
   onEmailChange = (event) => {
-    this.setState({ name: event.target.value });
+    this.setState({ email: event.target.value });
   };
   onNameChange = (event) => {
-    this.setState({ email: event.target.value });
+    this.setState({ name: event.target.value });
   };
   onPasswordChange = (event) => {
     this.setState({ password: event.target.value });

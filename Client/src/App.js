@@ -20,24 +20,24 @@ const particlesInit = (main) => {
 const particlesLoaded = (container) => {
   console.log(container);
 };
-
+const initialState = {
+  input: "",
+  imageUrl: "",
+  box: {},
+  route: "signin",
+  isSignIn: false,
+  user: {
+    id: "",
+    name: "",
+    email: "",
+    entries: 0,
+    joined: "",
+  },
+};
 class App extends Component {
   constructor() {
     super();
-    this.state = {
-      input: "",
-      imageUrl: "",
-      box: {},
-      route: "signin",
-      isSignIn: false,
-      user: {
-        id: "",
-        name: "",
-        email: "",
-        entries: 0,
-        joined: "",
-      },
-    };
+    this.state = initialState;
   }
   loadUser = (data) => {
     this.setState({
@@ -93,7 +93,7 @@ class App extends Component {
   };
   onRouteChange = (route) => {
     if (route === "signout") {
-      this.setState({ isSignIn: false });
+      this.setState(initialState);
     } else {
       this.setState({ isSignIn: true });
     }
