@@ -11,6 +11,12 @@ import FaceRecognition from "./FaceRecognition";
 import SignIn from "./SignIn";
 import Register from "./Register";
 
+// TO DO : improve UI (font and logo + move up the main detect frame)
+//         move components to files
+//         create functions for repetition code (such as routs)
+//         change to newer Clarify + move to server side
+//         validation on Sign in and Register (empty or wrong format)
+
 const app = new Clarifai.App({
   apiKey: "e064d389b77349b2865cb7ccd2e0585c",
 });
